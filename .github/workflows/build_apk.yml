@@ -13,6 +13,18 @@ jobs:
     steps:
     - uses: actions/checkout@v3
     
+    - name: Fix Directory Structure
+      run: |
+        mkdir -p lib
+        mv main.dart lib/ || true
+        mv providers lib/ || true
+        mv screens lib/ || true
+        mv services lib/ || true
+        mv theme lib/ || true
+        mv widgets lib/ || true
+        echo "Structure fixed. Listing lib folder:"
+        ls -R lib/
+    
     - name: Set up Java
       uses: actions/setup-java@v3
       with:
