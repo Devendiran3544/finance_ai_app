@@ -65,7 +65,7 @@ class SavingsScreen extends StatelessWidget {
         children: [
           Text("Total Savings", style: TextStyle(color: Colors.white70)),
           const SizedBox(height: 8),
-          Text("\$4,113.89", style: TextStyle(color: Colors.white, fontSize: 32, fontWeight: FontWeight.bold)),
+          Text("₹3,45,113", style: TextStyle(color: Colors.white, fontSize: 32, fontWeight: FontWeight.bold)),
           const SizedBox(height: 8),
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
@@ -73,7 +73,7 @@ class SavingsScreen extends StatelessWidget {
               color: Colors.greenAccent.withOpacity(0.1),
               borderRadius: BorderRadius.circular(20),
             ),
-            child: const Text("+\$3,004 (12%)", style: TextStyle(color: Colors.greenAccent)),
+            child: const Text("+₹25,000 (12%)", style: TextStyle(color: Colors.greenAccent)),
           ),
         ],
       ),
@@ -107,7 +107,7 @@ class SavingsScreen extends StatelessWidget {
                   children: [
                     Text(index % 2 == 0 ? "New Car" : "Dream House", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
                     const SizedBox(height: 4),
-                    Text("\$2,300", style: TextStyle(color: Colors.white70)),
+                    Text("₹1,90,000", style: TextStyle(color: Colors.white70)),
                   ],
                 ),
                 LinearProgressIndicator(

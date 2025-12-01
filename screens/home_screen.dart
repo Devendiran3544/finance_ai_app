@@ -7,6 +7,8 @@ import '../widgets/glass_card.dart';
 import '../widgets/neumorphic_button.dart';
 import 'market_screen.dart';
 import 'savings_screen.dart';
+import 'add_transaction_screen.dart';
+import 'profile_screen.dart'; // Will create next
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -18,12 +20,21 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   int _currentIndex = 0;
 
+  @override
+  void initState() {
+    super.initState();
+    // Initialize provider data
+    Future.microtask(() => 
+      Provider.of<TransactionProvider>(context, listen: false).init()
+    );
+  }
+
   final List<Widget> _screens = [
     const HomeContent(),
-    const MarketScreen(), // Placeholder for Market
-    const SizedBox(), // Placeholder for Add (FAB handles this)
-    const SavingsScreen(), // Placeholder for Savings
-    const Center(child: Text("Profile", style: TextStyle(color: Colors.white))),
+    const MarketScreen(),
+    const SizedBox(), // Placeholder for Add
+    const SavingsScreen(),
+    const ProfileScreen(), // Placeholder
   ];
 
   @override
@@ -35,14 +46,25 @@ class _HomeScreenState extends State<HomeScreen> {
       backgroundColor: theme.scaffoldBackgroundColor,
       body: _currentIndex == 0 
           ? const HomeContent() 
-          : _screens[_currentIndex], // Simple switching for now
+          : _screens[_currentIndex],
       bottomNavigationBar: _buildBottomNav(context),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => const AddTransactionScreen()),
+          );
+        },
+        backgroundColor: theme.primaryColor,
+        child: const Icon(Icons.add, color: Colors.black),
+      ),
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
     );
   }
 
   Widget _buildBottomNav(BuildContext context) {
     return Container(
-      margin: const EdgeInsets.all(20),
+      margin: const EdgeInsets.fromLTRB(20, 0, 20, 20),
       height: 70,
       decoration: BoxDecoration(
         color: const Color(0xFF1E1E1E),
@@ -66,21 +88,7 @@ class _HomeScreenState extends State<HomeScreen> {
             icon: Icon(Icons.analytics_outlined, color: _currentIndex == 1 ? Colors.white : Colors.white54),
             onPressed: () => setState(() => _currentIndex = 1),
           ),
-          Container(
-            width: 48,
-            height: 48,
-            decoration: BoxDecoration(
-              color: Theme.of(context).primaryColor,
-              shape: BoxShape.circle,
-              boxShadow: [
-                BoxShadow(
-                  color: Theme.of(context).primaryColor.withOpacity(0.4),
-                  blurRadius: 10,
-                ),
-              ],
-            ),
-            child: const Icon(Icons.add, color: Colors.black),
-          ),
+          const SizedBox(width: 48), // Space for FAB
           IconButton(
             icon: Icon(Icons.pie_chart_outline, color: _currentIndex == 3 ? Colors.white : Colors.white54),
             onPressed: () => setState(() => _currentIndex = 3),
@@ -166,16 +174,21 @@ class HomeContent extends StatelessWidget {
             Text("Welcome Back", style: TextStyle(color: Colors.white, fontSize: 24, fontWeight: FontWeight.bold)),
           ],
         ),
-        Container(
-          padding: const EdgeInsets.all(2),
-          decoration: BoxDecoration(
-            shape: BoxShape.circle,
-            border: Border.all(color: Colors.white24),
-          ),
-          child: const CircleAvatar(
-            radius: 24,
-            backgroundColor: Colors.white10,
-            child: Icon(Icons.person, color: Colors.white),
+        GestureDetector(
+          onTap: () {
+             // Navigate to profile via parent state if needed, or just let bottom nav handle it
+          },
+          child: Container(
+            padding: const EdgeInsets.all(2),
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              border: Border.all(color: Colors.white24),
+            ),
+            child: const CircleAvatar(
+              radius: 24,
+              backgroundColor: Colors.white10,
+              child: Icon(Icons.person, color: Colors.white),
+            ),
           ),
         ),
       ],
@@ -183,45 +196,49 @@ class HomeContent extends StatelessWidget {
   }
 
   Widget _buildWalletCard(BuildContext context) {
-    return GlassCard(
-      height: 220,
-      width: double.infinity,
-      color: const Color(0xFFE0B0FF).withOpacity(0.1), // Slight purple tint
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Row(
+    return Consumer<TransactionProvider>(
+      builder: (context, provider, _) {
+        return GlassCard(
+          height: 220,
+          width: double.infinity,
+          color: const Color(0xFFE0B0FF).withOpacity(0.1),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              const Icon(Icons.nfc, color: Colors.white70, size: 28),
-              Image.network('https://upload.wikimedia.org/wikipedia/commons/thumb/2/2a/Mastercard-logo.svg/1280px-Mastercard-logo.svg.png', height: 32, errorBuilder: (_,__,___) => const Icon(Icons.credit_card, color: Colors.white)),
-            ],
-          ),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text("Total Balance", style: TextStyle(color: Colors.white70)),
-              const SizedBox(height: 8),
-              Text(
-                "\$12,450.00",
-                style: TextStyle(
-                  fontSize: 36,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.white,
-                ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  const Icon(Icons.nfc, color: Colors.white70, size: 28),
+                  Image.network('https://upload.wikimedia.org/wikipedia/commons/thumb/2/2a/Mastercard-logo.svg/1280px-Mastercard-logo.svg.png', height: 32, errorBuilder: (_,__,___) => const Icon(Icons.credit_card, color: Colors.white)),
+                ],
+              ),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text("Total Balance", style: TextStyle(color: Colors.white70)),
+                  const SizedBox(height: 8),
+                  Text(
+                    provider.formatCurrency(provider.totalBalance),
+                    style: const TextStyle(
+                      fontSize: 36,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                    ),
+                  ),
+                ],
+              ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text("**** **** **** 8899", style: TextStyle(color: Colors.white70, fontSize: 16, letterSpacing: 1.5)),
+                  Text("10/28", style: TextStyle(color: Colors.white70)),
+                ],
               ),
             ],
           ),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text("**** **** **** 8899", style: TextStyle(color: Colors.white70, fontSize: 16, letterSpacing: 1.5)),
-              Text("10/28", style: TextStyle(color: Colors.white70)),
-            ],
-          ),
-        ],
-      ),
+        );
+      },
     );
   }
 
@@ -238,42 +255,46 @@ class HomeContent extends StatelessWidget {
   }
 
   Widget _buildWalletStatus(BuildContext context) {
-    return GlassCard(
-      child: Column(
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+    return Consumer<TransactionProvider>(
+      builder: (context, provider, _) {
+        return GlassCard(
+          child: Column(
             children: [
-              Text("Wallet Status", style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold)),
-              Text("See all", style: TextStyle(color: Theme.of(context).primaryColor)),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text("Wallet Status", style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold)),
+                  Text("See all", style: TextStyle(color: Theme.of(context).primaryColor)),
+                ],
+              ),
+              const SizedBox(height: 20),
+              Row(
+                children: [
+                  Expanded(
+                    child: _buildStatusItem(
+                      context,
+                      icon: Icons.arrow_upward_rounded,
+                      color: Colors.greenAccent,
+                      label: "Income",
+                      amount: provider.formatCurrency(provider.totalIncome),
+                    ),
+                  ),
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: _buildStatusItem(
+                      context,
+                      icon: Icons.arrow_downward_rounded,
+                      color: Colors.redAccent,
+                      label: "Expense",
+                      amount: provider.formatCurrency(provider.totalExpense),
+                    ),
+                  ),
+                ],
+              ),
             ],
           ),
-          const SizedBox(height: 20),
-          Row(
-            children: [
-              Expanded(
-                child: _buildStatusItem(
-                  context,
-                  icon: Icons.arrow_upward_rounded,
-                  color: Colors.greenAccent,
-                  label: "Income",
-                  amount: "\$5,200",
-                ),
-              ),
-              const SizedBox(width: 16),
-              Expanded(
-                child: _buildStatusItem(
-                  context,
-                  icon: Icons.arrow_downward_rounded,
-                  color: Colors.redAccent,
-                  label: "Expense",
-                  amount: "\$1,450",
-                ),
-              ),
-            ],
-          ),
-        ],
-      ),
+        );
+      },
     );
   }
 
@@ -318,47 +339,58 @@ class HomeContent extends StatelessWidget {
   }
 
   Widget _buildTransactionList() {
-    return ListView.builder(
-      shrinkWrap: true,
-      physics: const NeverScrollableScrollPhysics(),
-      itemCount: 3,
-      itemBuilder: (context, index) {
-        return Container(
-          margin: const EdgeInsets.only(bottom: 12),
-          child: GlassCard(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-            borderRadius: 16,
-            child: Row(
-              children: [
-                Container(
-                  padding: const EdgeInsets.all(10),
-                  decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.1),
-                    shape: BoxShape.circle,
-                  ),
-                  child: const Icon(Icons.shopping_bag_outlined, color: Colors.white),
+    return Consumer<TransactionProvider>(
+      builder: (context, provider, _) {
+        if (provider.transactions.isEmpty) {
+          return const Center(child: Text("No transactions yet", style: TextStyle(color: Colors.white54)));
+        }
+        return ListView.builder(
+          shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
+          itemCount: provider.transactions.length > 5 ? 5 : provider.transactions.length,
+          itemBuilder: (context, index) {
+            final tx = provider.transactions[index];
+            return Container(
+              margin: const EdgeInsets.only(bottom: 12),
+              child: GlassCard(
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                borderRadius: 16,
+                child: Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(10),
+                      decoration: BoxDecoration(
+                        color: Colors.white.withOpacity(0.1),
+                        shape: BoxShape.circle,
+                      ),
+                      child: Icon(
+                        tx.isExpense ? Icons.shopping_bag_outlined : Icons.attach_money,
+                        color: Colors.white,
+                      ),
+                    ),
+                    const SizedBox(width: 16),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(tx.title, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+                          Text(tx.category, style: const TextStyle(color: Colors.white54, fontSize: 12)),
+                        ],
+                      ),
+                    ),
+                    Text(
+                      "${tx.isExpense ? '-' : '+'}${provider.formatCurrency(tx.amount)}",
+                      style: TextStyle(
+                        color: tx.isExpense ? Colors.redAccent : Colors.greenAccent,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 16,
+                      ),
+                    ),
+                  ],
                 ),
-                const SizedBox(width: 16),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text("Grocery Store", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
-                      Text("Today, 10:00 AM", style: TextStyle(color: Colors.white54, fontSize: 12)),
-                    ],
-                  ),
-                ),
-                Text(
-                  "-\$45.00",
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontWeight: FontWeight.bold,
-                    fontSize: 16,
-                  ),
-                ),
-              ],
-            ),
-          ),
+              ),
+            );
+          },
         );
       },
     );

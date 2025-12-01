@@ -73,7 +73,7 @@ class MarketScreen extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text("Bitcoin (BTC)", style: TextStyle(color: Colors.white70)),
-                  Text("\$45,230.50", style: TextStyle(color: Colors.white, fontSize: 24, fontWeight: FontWeight.bold)),
+                  Text("₹35,23,050", style: TextStyle(color: Colors.white, fontSize: 24, fontWeight: FontWeight.bold)),
                 ],
               ),
               Container(
@@ -179,7 +179,7 @@ class MarketScreen extends StatelessWidget {
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.end,
                     children: [
-                      Text("\$45k", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+                      Text("₹35L", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
                       Text("+1.2%", style: TextStyle(color: Colors.greenAccent, fontSize: 12)),
                     ],
                   ),
