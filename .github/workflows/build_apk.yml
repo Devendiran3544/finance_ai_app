@@ -22,8 +22,7 @@ jobs:
         mv services lib/ || true
         mv theme lib/ || true
         mv widgets lib/ || true
-        echo "Structure fixed. Listing lib folder:"
-        ls -R lib/
+        echo "Structure fixed."
     
     - name: Set up Java
       uses: actions/setup-java@v3
@@ -37,6 +36,9 @@ jobs:
         flutter-version: '3.19.0'
         channel: 'stable'
         
+    - name: Initialize Android Platform
+      run: flutter create . --platforms android
+      
     - name: Install Dependencies
       run: flutter pub get
       
